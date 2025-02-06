@@ -39,7 +39,7 @@ names(data_clean)[23]<- "Gender"
 names(data_clean)[24]<- "If Not Listed, Specify"
 names(data_clean)[25]<- "Sex"
 names(data_clean)[26]<- "If Other, Specify 5"
-names(data_clean)[27]<- "Sexual Orientation"
+names(data_clean)[27]<- "SexualOrientation"
 names(data_clean)[28]<- "If Other, Specify 6"
 names(data_clean)[29]<- "Racial Identity"
 names(data_clean)[30]<- "If Other, Specify 7"
@@ -127,7 +127,7 @@ summary_race<- data_clean%>%
   group_by(`Racial Identity`)%>%
   summarise(count = n())
 print(summary_race)
-
+View(summary_race)
 #Country of Origin 
 summary_origin<-data_clean%>%
   group_by(`Country of Origin`)%>%
@@ -136,9 +136,177 @@ View(summary_origin)
 
 #Sexual Orientation
 summary_orientation<-data_clean%>%
-  group_by(`Sexual Orientation`)%>%
+  group_by(`SexualOrientation`)%>%
   summarise(count = n())
 View(summary_orientation)
+
+#Career Position
+summary_career<-data_clean%>%
+  group_by(`Career Position `)%>%
+  summarise(count = n())
+View(summary_career)
+
+#primary scientific tools
+summary_tools<-data_clean%>%
+  group_by(`Primary Scientific Tools`)%>%
+  summarise(count = n())
+View(summary_tools)
+
+#Primary Time period
+summary_time<-data_clean%>%
+  group_by(`Primary Time Period`)%>%
+  summarise(count = n())
+View(summary_time)
+
+#Ethnicity
+summary_ethnicity<-data_clean%>%
+  group_by(Ethnicity)%>%
+  summarise(count = n())
+View(summary_ethnicity)
+
+#Country of origin
+summary_origin<-data_clean%>%
+  group_by(`Country of Origin`)%>%
+  summarise(count = n())
+View(summary_origin)
+library(stringr)
+summary_origin<- summary_origin %>%
+  mutate(
+    Country = str_trim(`Country of Origin`),  # Remove leading/trailing whitespaces
+    Country = case_when(
+      str_detect(`Country of Origin`, regex("^(US|USA|United States|United States of America|United states|Us|Usa|usa)$", ignore_case = TRUE)) ~ "United States",
+      str_detect(`Country of Origin`, regex("^(UK|United Kingdom|England|Scotland|Uni)$", ignore_case = TRUE)) ~ "United Kingdom",
+      str_detect(`Country of Origin`, regex("^(France|Francz)$", ignore_case = TRUE)) ~ "France",
+      str_detect(`Country of Origin`, regex("^(Germany|germany)$", ignore_case = TRUE)) ~ "Germany",
+      str_detect(`Country of Origin`, regex("^(Belgium|belgium)$", ignore_case = TRUE)) ~ "Belgium",
+      str_detect(`Country of Origin`, regex("^(Russia|former USSR)$", ignore_case = TRUE)) ~ "Russia",
+      str_detect(`Country of Origin`, regex("^(NA|prefer not to say|USA/Austria|USA/Germany|USA and Canada)$", ignore_case = TRUE)) ~ NA_character_,
+      str_detect(`Country of Origin`, regex("^(NONE OF YOUR FUCKING BUSINESS YOU NOSEY, INTRUSIVE JERK)$", ignore_case = TRUE)) ~ NA_character_,
+      TRUE ~ Country
+    )
+  )
+library(dplyr)
+country_counts <- summary_origin %>%
+  group_by(Country) %>%
+  summarise(Total_Count = sum(count, na.rm = TRUE)) %>%
+  arrange(desc(Total_Count))
+
+View(country_counts)
+country_counts <- country_counts %>%
+  filter(!row_number() %in% c(2, 33,35))
+
+#Subdiscipline
+
+
+summary_subdiscipline<- summary_subdiscipline %>%
+  mutate(
+    Subdiscipline = str_trim(Subdiscipline),  # Remove leading/trailing whitespaces
+    Subdiscipline = case_when(
+      str_detect(Subdiscipline, regex("^(Earth Surface + Lithosphere,Natural Hazards,Tectonophysics|
+    Earth Surface + Lithosphere,Sedimentology,Planetary Sciences|
+    Earth Surface + Lithosphere,Seismology,Tectonophysics|
+    Earth Surface + Lithosphere,Tectonophysics|
+    Earth Surface + Lithosphere,Tectonophysics,Education|
+    Earth Surface + Lithosphere,Tectonophysics,Mineral and Rock Physics/Chemistry|
+    Earth Surface + Lithosphere,Volcanology, Geochemistry, and Petrology)$", ignore_case = TRUE)) ~ "Earth Surface + Lithosphere",
+      str_detect(Subdiscipline, regex("^(Earth and Planetary Surface Processes/Geomorphology|
+                                      Earth and Planetary Surface Processes/Geomorphology,Education|
+                                      Earth and Planetary Surface Processes/Geomorphology,Education,Other|
+                                      Earth and Planetary Surface Processes/Geomorphology,Geochronology|
+                                      Earth and Planetary Surface Processes/Geomorphology,Geochronology,Natural Hazards,Seismology,Tectonophysics,Earth Interior + Planetary Science,Mineral and Rock Physics/Chemistry|
+                                      Earth and Planetary Surface Processes/Geomorphology,Geochronology,Sedimentology|
+                                      Earth and Planetary Surface Processes/Geomorphology,Geochronology,Tectonophysics|
+                                      Earth and Planetary Surface Processes/Geomorphology,Geodesy,Natural Hazards,Seismology,Volcanology, Geochemistry, and Petrology,Education|
+                                      Earth and Planetary Surface Processes/Geomorphology,Natural Hazards|
+                                      Earth and Planetary Surface Processes/Geomorphology,Natural Hazards,Planetary Sciences|
+                                      Earth and Planetary Surface Processes/Geomorphology,Planetary Sciences|
+                                      Earth and Planetary Surface Processes/Geomorphology,Sedimentology|
+                                      Earth and Planetary Surface Processes/Geomorphology,Seismology,Tectonophysics,Mineral and Rock Physics/Chemistry|
+                                      Earth and Planetary Surface Processes/Geomorphology,Tectonophysics)$", ignore_case = TRUE)) ~ "Earth and Planetary Surface Processes",
+      str_detect(Subdiscipline, regex("^(Fluid Earth + Climate|
+    Fluid Earth + Climate,Atmospheric Sciences|
+    Fluid Earth + Climate,Atmospheric Sciences,Cryosphere Sciences,Global Environmental Change,Ocean Sciences,Paleoceanography and Paleoclimatology,Earth and Planetary Surface Processes/Geomorphology,Natural Hazards|
+    Fluid Earth + Climate,Atmospheric Sciences,Earth and Planetary Surface Processes/Geomorphology,Natural Hazards,Education|
+    Fluid Earth + Climate,Atmospheric Sciences,Global Environmental Change,Natural Hazards,Informatics|
+    Fluid Earth + Climate,Atmospheric Sciences,Global Environmental Change,Ocean Sciences,Mathematical tools,Nonlinear Geophysics|
+    Fluid Earth + Climate,Atmospheric Sciences,Global Environmental Change,Paleoceanography and Paleoclimatology,GeoHealth|
+    Fluid Earth + Climate,Biogeosciences/Geobiology,Global Environmental Change,Paleoceanography and Paleoclimatology|
+    Fluid Earth + Climate,Cryosphere Sciences|
+    Fluid Earth + Climate,Cryosphere Sciences,Hydrology,Paleoceanography and Paleoclimatology,Earth Surface + Lithosphere,Earth and Planetary Surface Processes/Geomorphology,Geodesy,Natural Hazards,Study of the Earth’s Deep Interior|
+    Fluid Earth + Climate,Cryosphere Sciences,Informatics|
+    Fluid Earth + Climate,Cryosphere Sciences,Ocean Sciences|
+    Fluid Earth + Climate,Cryosphere Sciences,Paleoceanography and Paleoclimatology,Earth Surface + Lithosphere,Earth and Planetary Surface Processes/Geomorphology|
+    Fluid Earth + Climate,Cryosphere Sciences,Paleoceanography and Paleoclimatology,Earth Surface + Lithosphere,Earth and Planetary Surface Processes/Geomorphology,Geochronology|
+    Fluid Earth + Climate,Cryosphere Sciences,Planetary Sciences,Nonlinear Geophysics|
+    Fluid Earth + Climate,Global Environmental Change,Paleoceanography and Paleoclimatology,Earth and Planetary Surface Processes/Geomorphology|
+    Fluid Earth + Climate,Hydrology|
+    Fluid Earth + Climate,Hydrology,Earth Surface + Lithosphere,Earth and Planetary Surface Processes/Geomorphology,Near-Surface Geophysics,Mathematical tools|
+    Fluid Earth + Climate,Ocean Sciences|
+    Fluid Earth + Climate,Ocean Sciences,Education|
+    Fluid Earth + Climate,Paleoceanography and Paleoclimatology|
+    Fluid Earth + Climate,Paleoceanography and Paleoclimatology,Earth Surface + Lithosphere,Earth Interior + Planetary Science|
+    Fluid Earth + Climate,Society + Education,Mathematical tools)$", ignore_case = TRUE)) ~ "Fluid Earth +Climate",
+      str_detect(Subdiscipline, regex("^(Geochronology,Tectonophysics|
+                                      Geochronology,Tectonophysics,Volcanology, Geochemistry, and Petrology,Education|
+                                      Geochronology,Volcanology, Geochemistry, and Petrology)$", ignore_case = TRUE)) ~ "Geochronology",
+      str_detect(Subdiscipline, regex("^(Geomagnetism, Paleomagnetism and Electromagnetism,Planetary Sciences)$", ignore_case = TRUE)) ~ "Geomagnetism",
+      str_detect(Subdiscipline, regex("^(Global Environmental Change,Hydrology,Earth and Planetary Surface Processes/Geomorphology,Education|
+                                      Global Environmental Change,Ocean Sciences|
+                                      Global Environmental Change,Ocean Sciences,Education|
+                                      Global Environmental Change,Ocean Sciences,Paleoceanography and Paleoclimatology|
+                                      Global Environmental Change,Soil Science)$", ignore_case = TRUE)) ~ "Global Enviornmental Change",
+      str_detect(Subdiscipline, regex("^(Hydrology|
+                                      Hydrology,Earth Surface + Lithosphere|
+                                      Hydrology,Earth Surface + Lithosphere,Earth and Planetary Surface Processes/Geomorphology,Geochronology|
+                                      Hydrology,Earth Surface + Lithosphere,Earth and Planetary Surface Processes/Geomorphology,Geomagnetism, Paleomagnetism and Electromagnetism,Sedimentology,Tectonophysics|
+                                      Hydrology,Earth and Planetary Surface Processes/Geomorphology|
+                                      Hydrology,Earth and Planetary Surface Processes/Geomorphology,Education|
+                                      Hydrology,Earth and Planetary Surface Processes/Geomorphology,Mineral and Rock Physics/Chemistry|
+                                      Hydrology,Earth and Planetary Surface Processes/Geomorphology,Natural Hazards|
+                                      Hydrology,Earth and Planetary Surface Processes/Geomorphology,Sedimentology,Planetary Sciences,Education,Science and Society|
+                                      Hydrology,Ocean Sciences,Earth and Planetary Surface Processes/Geomorphology|
+                                      Hydrology,Ocean Sciences,Volcanology, Geochemistry, and Petrology|
+                                      Hydrology,Planetary Sciences,Science and Society|
+                                      Hydrology,Soil Science)$", ignore_case = TRUE)) ~ "Hydrology",
+      str_detect(Subdiscipline, regex("^(Mineral and Rock Physics/Chemistry|
+                                      Mineral and Rock Physics/Chemistry,Education,Science and Society,Informatic)$", ignore_case = TRUE)) ~ "Mineral and Rock Physics/Chemistry",
+      str_detect(Subdiscipline, regex("^N/A|
+    Natural Hazards|
+    Near-Surface Geophysics)$", ignore_case = TRUE)) ~ "Other",
+      TRUE ~ Subdiscipline
+    )
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+grouped_data <- summary_orientation %>%
+  mutate(Group = case_when(
+    grepl("Straight", Sexual_Orientation, ignore.case = TRUE) ~ "Straight",
+    grepl("Gay", Sexual_Orientation, ignore.case = TRUE) ~ "Gay",
+    grepl("Lesbian", Sexual_Orientation, ignore.case = TRUE) ~ "Lesbian",
+    grepl("Bisexual", Sexual_Orientation, ignore.case = TRUE) ~ "Bisexual",
+    grepl("Asexual", Sexual_Orientation, ignore.case = TRUE) ~ "Asexual",
+    grepl("Queer", Sexual_Orientation, ignore.case = TRUE) ~ "Queer",
+    grepl("Prefer not to say", Sexual_Orientation, ignore.case = TRUE) ~ "Prefer not to say",
+    is.na(Sexual_Orientation) ~ "NA",
+    TRUE ~ "Other"
+  ))
+
+summary <- grouped_data %>%
+  group_by(Group) %>%
+  summarise(Total_Count = sum(Count, na.rm = TRUE))
+print(summary)
 
 #Vizualize
 install.packages('ggplot2')
@@ -614,6 +782,147 @@ View(broad_subdiscipline_counts)
 
 
 
+#overall data
+
+library(dplyr)
+#Q1
+Q1 <- data_examples[, 1:2 ]
+View(Q1)
+Q1_filtered <- Q1 %>%
+  filter(
+    `Gendered Language or Metaphors:'She'` == "Yes")
+Q1 <- Q1_filtered[!is.na(Q1_filtered[, 2]), ]
+View(Q1)
+
+#Q2
+Q2 <- data_examples[, 3:4]
+View(Q2)
+Q2_filtered <- Q2 %>%
+  filter(
+    `Sexual Language or Metaphors: 'Turn on'` == "Yes")
+View(Q2_filtered)
+Q2 <- Q2_filtered[!is.na(Q2_filtered[, 2]), ]
+View(Q2)
+
+#Q3
+Q3 <- data_examples[, 5:6]
+View(Q3)
+Q3_filtered <- Q3 %>%
+  filter(
+    `Gendered or Sexual Language as Jargon:'knockers'` == "Yes")
+View(Q3_filtered)
+Q3 <- Q3_filtered[!is.na(Q3_filtered[, 2]), ]
+View(Q3)
+
+#Q4
+Q4 <- data_examples[, 7:8]
+View(Q4)
+Q4_filtered <- Q4 %>%
+  filter(
+    `Sexist Language or Imagery: Hot Tub Example` == "Yes")
+View(Q4_filtered)
+Q4 <- Q4_filtered[!is.na(Q4_filtered[, 2]), ]
+View(Q4)
+
+#Q5
+Q5 <- data_examples[, 9:10]
+View(Q5)
+Q5_filtered <- Q5 %>%
+  filter(
+   `Racially-Gendered Language: Slurs/Slang/Place Names` == "Yes")
+View(Q5_filtered)
+Q5 <- Q5_filtered[!is.na(Q5_filtered[, 2]), ]
+View(Q5)
+
+
+#Q6
+Q6 <- data_examples[, 11:12]
+View(Q6)
+Q6_filtered <- Q6 %>%
+  filter(
+    `LGBTQ-Centered Language: Dike Joes` == "Yes")
+View(Q6_filtered)
+Q6 <- Q6_filtered[!is.na(Q6_filtered[, 2]), ]
+View(Q6)
+
+
+#Q7
+Q7 <- data_examples[, 13:14]
+View(Q7)
+Q7_filtered <- Q7 %>%
+  filter(
+    `Other Gendered/Sexist/Sexual Language` == "Yes")
+View(Q7_filtered)
+Q7 <- Q7_filtered[!is.na(Q7_filtered[, 2]), ]
+View(Q7)
+
+#Visualize
+install.packages('ggplot2')
+library(ggplot2)
+
+#Prep Data
+data_stats<- data.frame(
+  Question = paste("Q", 1:7, sep = ""),
+  Total_Yes = c(190, 216, 154, 51, 115, 112, 71),
+  Specific_Examples = c(130,169,121, 40, 89, 82, 54),
+  Total_Respondents = rep(361, 7)
+)
+#Proportions of specific examples
+data_stats$Proportion_Yes <- data_stats$Total_Yes / data_stats$Total_Respondents
+data_stats$Proportion_Specific_Examples <- data_stats$Specific_Examples / data_stats$Total_Yes
+
+#Reshape data for plotting
+data_stats_long<- data.frame(
+  Question =rep(data_stats$Question, each = 2),
+  Category = rep(c("Yes","Specific Examples"), times = 7),
+  Count = c(data_stats$Total_Yes - data_stats$Specific_Examples, data_stats$Specific_Examples)
+)
+
+#Plot the data
+library(ggplot2)
+ggplot(data_stats_long, aes(x = Question, y = Count, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Proportion of 'Yes' Responses and 'Specific Examples' per Question",
+    x = "Question",
+    y = "Count",
+    fill = "Category"
+  ) +
+  scale_fill_manual(values = c("lightblue","darkblue")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#trying something
+data_stats_long <- data.frame(
+  Question = c("Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"),
+  Total_Yes = c(190, 216, 154, 51, 115, 112, 71),
+  Specific_Examples = c(130, 169, 121, 40, 89, 82, 54),
+  Total_Respondents = rep(361, 7)
+)
+
+# Calculate the percentage for 'Specific Examples' among those who said 'Yes'
+data_stats_long$Percentage_Specific_Examples <- 
+  (data_stats_long$Specific_Examples / data_stats_long$Total_Yes) * 100
+
+# Prepare labels for text annotations
+data_stats_long$Label_Yes <- paste(data_stats_long$Total_Yes, "/", data_stats_long$Total_Respondents)
+data_stats_long$Label_Percentage <- paste(round(data_stats_long$Percentage_Specific_Examples, 2), "%")
+
+# Create a stacked bar plot
+ggplot(data_stats_long, aes(x = Question, y = Total_Yes, fill = "Yes")) +
+  geom_bar(stat = "identity") +
+  geom_bar(aes(y = Specific_Examples, fill = "Specific Examples"), stat = "identity") +
+  geom_text(aes(y = Total_Yes + 10, label = Label_Yes), size = 4, vjust = 0) +  # Label outside the bar
+  geom_text(aes(y = Specific_Examples / 2, label = Label_Percentage), size = 4, color = "white") +  # Label inside the bar
+  labs(
+    title = "Proportion of 'Yes' Responses and 'Specific Examples' per Question",
+    x = "Question",
+    y = "Count",
+    fill = "Category"
+  ) +
+  scale_fill_manual(values = c("lightblue", "darkblue")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
 
